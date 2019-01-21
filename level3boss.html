@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>level3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  canvas{
+    border: 1px solid #d3d3d3;
+       background-color:black;
+     }
+</style>
+</head>
+<body onload="startgame()">
+  <script>
+    var ghost;
+    function startgame(){
+      myGameArea.start();
+      //stone platform is a place holder- replace later
+      //spikes are a place holder replace later
+      hitter1 = new component(40,40,"flyingeye.gif",-200,-200,"image");
+      hitter2 = new component(40,40,"flyingeye.gif",-800,-200,"image");
+      hitter3 = new component(40,40,"flyingeye.gif",-800,-200,"image");
+      hitter4 = new component(40,40,"flyingeye.gif",-300,-300,"image");
+      hitter5 = new component(40,40,"flyingeye.gif",-800,-300,"image");
+      hitter6 = new component(40,40,"flyingeye.gif",-800,-300,"image");
+      eye1 = new component(20,20,"flyingeye.gif",1000,1000,"image");
+      endDoor = new component(80,150, "spookyishdoor.jpg", 850,460,"image");
+    ghost =new component(55,100,"floatingright.gif",0,510,"image");
+    hellhound = new component(40, 40, "enemywalk.gif", 10000,10000,"image");
+    talkingpane = new component(800,200, "talkingpane.png", -800,0,"image");
+    witch = new component(85,180,"witchstanding.jpg",800,200,"image");
+    witchstand = new component(200,300,"stoneplatform.png",800,375,"image");
+    platform = new component(75,20,"stoneplatform.png",400,450,"image");
+    platform2 = new component(50,20,"stoneplatform.png",420,450,"image");
+    platform3 = new component(75,20,"stoneplatform.png",520,430,"image");
+    platform4 = new component(50,20,"stoneplatform.png",530,430,"image");
+    platform5 = new component(200,20,"stoneplatform.png",800,382,"image");
+
+  }
+  var myGameArea = {
+      canvas : document.createElement("canvas"),
+      start : function() {
+          this.canvas.width = 1000;
+          this.canvas.height = 600;
+          this.context = this.canvas.getContext("2d");
+          document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+          this.interval = setInterval(updateGameArea, 20);
+          window.addEventListener('keydown', function (e) {
+              myGameArea.key = e.keyCode;
+          })
+          window.addEventListener('keyup', function (e) {
+              myGameArea.key = false;
+          })
+       },
+        clear : function(){
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          },
+          stop : function() {
+            window.open('page2.html', '_blank');
+            alert("game over ");
+            clearInterval(this.interval);
+          }
+          }
+      function component(width, height, color, x, y, type) {
+            this.type=type;
+              if (type == "image") {
+                  this.image = new Image();
+                  this.image.src = color;
+                  }
+                this.gamearea = myGameArea;
+                this.width = width;
+                this.height = height;
+                this.speedX = 0;
+                this.speedY = 0;
+                this.gravity = .09;
+                this.gravitySpeed=0;
+                this.x = x;
+                this.y = y;
+                this.update=function(){
+                  ctx=myGameArea.context;
+                  if(type=="image"){
+                    ctx.drawImage(this.image,
+                      this.x,
+                      this.y,
+                      this.width, this.height);
+                  }
+                  else{
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+              }
+              }
+              this.newPos=function(){
+                this.gravitySpeed+=this.gravity;
+                //just experimenting, orobably // FIX
+                this.x+=this.speedX;
+                this.y+=this.speedY+this.gravitySpeed;
+                this.hitBottom();
+              }
+              this.hitBottom =function(){
+                var leground= myGameArea.canvas.height- this.height;
+                if(this.y>leground){
+                  this.y =leground;
+                }
+                }
+                this.crashWith = function(otherobj){
+                  var myleft=this.x;
+                  var myright=this.x+(this.width);
+                  var mytop=this.y;
+                  var mybottom=this.y+(this.height);
+                  var otherleft=otherobj.x;
+                  var otherright=otherobj.x+(otherobj.height);
+                  //this should be width too
+                  var othertop=otherobj.y;
+                  var otherbottom=otherobj.y +(otherobj.height);
+                  var crash = true;
+                  if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                      crash = false;
+                    }
+                  else{
+                    return crash;
+                  }
+                }
+              }
+      function updateGameArea(){
+        ghost.gravitySpeed=10;
+        // if(ghost.crashWith(endDoor)){
+        //   endDoor.image.src="spookydoor.gif";
+        //   window.open('gamingFundimentals.html', '_blank');
+        //   console.log("x");
+        // }
+        if (ghost.crashWith(hitter1)){
+          myGameArea.stop();
+        }
+        if (ghost.crashWith(hitter2)){
+          myGameArea.stop();
+        }
+        if (ghost.crashWith(hitter3)){
+          myGameArea.stop();
+        }
+        if (ghost.crashWith(hitter4)){
+          myGameArea.stop();
+        }
+        if (ghost.crashWith(hitter5)){
+          myGameArea.stop();
+        }
+        if (ghost.crashWith(hitter6)){
+          myGameArea.stop();
+        }
+        if (ghost.crashWith(eye1)){
+          myGameArea.stop();
+        }
+        if(ghost.x>eye1.x){
+          talkingpane.x=-1000;
+          eye1.x+=4;
+          eye1.y-=6;
+        }
+        if (ghost.crashWith(hellhound)){
+          myGameArea.stop();
+        }
+        if(ghost.crashWith(platform)){
+          ghost.y=platform.y-platform.width;
+          if (myGameArea.key && myGameArea.key == 38) {ghost.y+=-35; ghost.x+=5; ghost.gravity=0; ghost.image.src="jump.gif"}
+
+        }
+        if(ghost.crashWith(platform2)){
+          ghost.y=platform.y-platform.width;
+        }
+        if(ghost.crashWith(platform3)){
+          ghost.y=platform.y-platform.width;
+          if (myGameArea.key && myGameArea.key == 38) {ghost.y+=-30; ghost.x+=5; ghost.speedY=4; ghost.gravity=0; ghost.image.src="jump.gif"}
+
+        }
+        if(ghost.crashWith(platform4)){
+          ghost.y=platform.y-platform.width-25;
+        }
+        if(ghost.crashWith(platform5)){
+          ghost.y=platform5.y-100;
+        }
+        myGameArea.clear();
+        ghost.speedX = 0;
+        ghost.speedY = 0;
+        hellhound.x-=5;
+          if (myGameArea.key && myGameArea.key == 37){
+            ghost.speedX = -2;
+            ghost.image.src="floatingleft.gif"
+          }
+          if (myGameArea.key && myGameArea.key == 37) {ghost.speedX = -2; ghost.image.src="floatingleft.gif"}
+          if (myGameArea.key && myGameArea.key == 39) {ghost.speedX = 4; ghost.image.src ="floatingright.gif";}
+          if (myGameArea.key && myGameArea.key == 38) {ghost.y+=-15; ghost.x+=5; ghost.image.src="jump.gif"; ghost.gravity=-10; }
+          else{ghost.gravity=10;}
+        if(myGameArea.key && myGameArea.key==40){
+          ghost.image.src="attackright.gif";
+        }
+        if(hellhound.x-ghost.x<100&&hellhound.x>ghost.x){
+          if(myGameArea.key && myGameArea.key==40){
+            ghost.image.src="attackright.gif";hellhound.x+=100; hellhound.y+=80;hellhound.image.src="hitback.gif"; hellhound.speedY-=.5;hellhound.speedX-=.5;
+          }
+        }
+        if(witch.x-ghost.x<100 && witch.y-ghost.y<=20){
+          if(myGameArea.key && myGameArea.key==40){
+            ghost.image.src="attackright.gif"; witch.image.src="death.gif";
+            window.open('youwin.html', '_blank');
+            witch.update();
+            GameArea.stop();
+          }
+        }
+        if(ghost.x==20){
+          witch.image.src="witch.gif";
+          hellhound.x=600;
+          hellhound.y=540;
+          hellhound.speedX=20;
+        }
+        if(ghost.x==120){
+          eye1.x=800;
+          eye1.y=200;
+        }
+        if(ghost.x==120){
+          hitter1.y=150;
+          hitter1.x=755;
+          hitter2.y=200;
+          hitter2.x=755;
+          hitter3.y=250;
+          hitter3.x=755;
+        }
+
+        if(ghost.x>=120){
+          hitter1.y-=2;
+          hitter1.x-=2;
+          hitter2.y=200;
+          hitter2.x-=2;
+          hitter3.y+=2;
+          hitter3.x-=2;
+        }
+        if(ghost.x==200 || ghost.y==platform.y){
+          hitter4.y=150;
+          hitter4.x=755;
+          hitter5.y=200;
+          hitter5.x=755;
+          hitter6.y=250;
+          hitter6.x=755;
+        }
+
+        if(ghost.x>=400){
+          hitter4.y-=2;
+          hitter4.x-=2;
+          hitter5.y=200;
+          hitter5.x-=2;
+          hitter6.y+=2;
+          hitter6.x-=2;
+                }
+        if(witch.y<=200&&witch.y>=195){
+          witch.y-=.5;
+         }
+         else{
+           witch.y+=5;
+         }
+        eye1.y+=4;
+        eye1.x-=5;
+        ghost.newPos();
+        ghost.update();
+        witch.update();
+        hellhound.update();
+        witchstand.update();
+        eye1.update();
+        platform.update();
+        platform2.update();
+        platform3.update();
+        platform4.update();
+        platform5.update();
+        hitter1.update();
+        hitter2.update();
+        hitter3.update();
+        hitter4.update();
+        hitter5.update();
+        hitter6.update();
+      }
+
+</script>
+</body>
+</html>

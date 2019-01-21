@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <!-- wizard and witch:thanks to Warren Clark
+  background: thanks to edermunizz -->
+<head>
+  <title>starting again</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+  canvas{
+    border: 1px solid #d3d3d3;
+       background-color:white;
+       background-image: url('hCUwLQ.png');
+
+       /* background-image: url('https://img.itch.zone/aW1hZ2UvMTIxNjU4LzU2MDQxMC5wbmc=/original/hCUwLQ.png'); */
+  }
+
+</style>
+</head>
+<body onload="startgame()">
+  <script>
+  var GamePiece;
+    function startgame(){
+      myGameArea.start();
+      GamePiece=new component(55,100,"floatingright.gif", 10, 120,"image");
+      myBlock = new component(40, 40, "enemywalk.gif", 600,540,"image");
+      myBlock2 = new component(50, 50, "enemywalk.gif", 300,540,"image");
+      endDoor = new component(80,150, "spookyishdoor.jpg", 850,460,"image");
+      talkingeye = new component(50, 50, "flyingeye.gif", 750,520,"image");
+      talkingpane = new component(800,200, "talkingpane.png", 0,0,"image");
+    }
+      //this code will start the game ov, but call the function that sets everything up
+    //the value of this. remains at whatever it was set to when entering the execution context- will reset stuff
+    //game area is an object
+
+    var myGameArea = {
+        canvas : document.createElement("canvas"),
+        start : function() {
+            this.canvas.width = 1000;
+            this.canvas.height = 600;
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.interval = setInterval(updateGameArea, 20);
+            window.addEventListener('keydown', function (e) {
+                myGameArea.key = e.keyCode;
+            })
+            window.addEventListener('keyup', function (e) {
+                myGameArea.key = false;
+            })
+         },
+          clear : function(){
+              this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
+            stop : function() {
+              window.open('page2.html', '_blank');
+              alert("game over ");
+              clearInterval(this.interval);
+            }
+            }
+      function component(width, height, color, x, y, type) {
+            this.type=type;
+              if (type == "image") {
+                  this.image = new Image();
+                  this.image.src = color;
+                  }
+                this.gamearea = myGameArea;
+                this.width = width;
+                this.height = height;
+                this.speedX = 0;
+                this.speedY = 0;
+                this.gravity = .09;
+                this.gravitySpeed=0;
+                this.x = x;
+                this.y = y;
+                this.update = function() {
+                  ctx = myGameArea.context;
+                  if(type=="image"){
+                    ctx.drawImage(this.image,
+                      this.x,
+                      this.y,
+                      this.width, this.height);
+                  }
+                  else{
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+              }
+            }
+                this.newPos = function() {
+                    this.gravitySpeed += this.gravity;
+                    this.x += this.speedX;
+                    this.y += this.speedY+this.gravitySpeed;
+                    this.hitBottom();
+                }
+                this.crashWith = function(otherobj){
+                  //this notes the location of the game piece, and plugs in the component on the update function then
+                  //compares them and if it overlaps it logs that it is a crash
+                  var myleft=this.x;
+                  var myright=this.x+(this.width);
+                  var mytop=this.y;
+                  var mybottom=this.y+(this.height);
+                  var otherleft=otherobj.x;
+                  var otherright=otherobj.x+(otherobj.height);
+                  var othertop=otherobj.y;
+                  var otherbottom=otherobj.y +(otherobj.height);
+                  var crash = true;
+                  if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                      crash = false;
+                    }
+                  else{
+                    return crash;
+                  }
+                }
+                this.hitBottom =function(){
+                  var leground= myGameArea.canvas.height- this.height;
+                  if(this.y>leground){
+                    this.y =leground;
+                  }
+                }
+              }
+
+
+            function updateGameArea() {
+
+              if (GamePiece.crashWith(myBlock)){
+                myGameArea.stop();
+              }
+              if (GamePiece.crashWith(myBlock2)){
+                myGameArea.stop();
+              }
+              else{
+                myGameArea.clear();
+                GamePiece.speedX = 0;
+                GamePiece.speedY = 0;
+                myBlock.x+=-1
+                if(GamePiece.x==endDoor.x){endDoor.image.src="spookydoor.gif";window.open('level2.html', '_blank');}
+                //enter and interaction with things
+                if (myGameArea.key && myGameArea.key == 13){
+                  if(talkingeye.x-GamePiece.x<60){
+                    for(var i=0;i<10;i++){
+                      talkingpane.update();
+                    }
+                    talkingeye.y-=1000;
+                  }
+                }
+                if (myGameArea.key && myGameArea.key == 37) {GamePiece.speedX = -2; GamePiece.image.src="floatingleft.gif"}
+                // if (myGameArea.key && myGameArea.key == 37) {GamePiece.speedX = -2; GamePiece.image.src="leftwalk.gif"}
+                //right
+                if (myGameArea.key && myGameArea.key == 39) {GamePiece.speedX = 4; GamePiece.image.src ="floatingright.gif";}
+            // if (myGameArea.key && myGameArea.key == 39) {GamePiece.speedX = 2; GamePiece.image.src ="walkinggrey.gif";}
+                if (myGameArea.key && myGameArea.key == 38) {GamePiece.y+= -35; GamePiece.x+=10; GamePiece.gravity=0; GamePiece.image.src="jump.gif"}
+                if(myBlock.x-GamePiece.x<100&&myBlock.x>GamePiece.x){
+                  if(myGameArea.key && myGameArea.key==40){
+                    GamePiece.image.src="attackright.gif";myBlock.x+=60;myBlock.image.src="hitback.gif";
+                  }
+                  // else{
+                  //   MyBlock.image.src="enemywalk.gif";
+                  //   MyBlock2.image.src="enemywalk.gif";
+                  // }
+                }
+                if(myBlock2.x>GamePiece.x||myBlock.x>GamePiece.x){
+                if(myBlock2.x-GamePiece.x<100){
+                  if(myGameArea.key && myGameArea.key==40){
+                    GamePiece.image.src="attackright.gif";myBlock2.x+=60;myBlock2.image.src="hitback.gif";
+                  }
+                }
+              }
+              else{
+                myBlock.x-=1;
+                myBlock2.x-=1;
+              }
+                // if (myGameArea.key && myGameArea.key == 39 && myGameArea.key && myGameArea.key == 38){GamePiece.speedY = -10; GamePiece.gravity=-.05; GamePiece.speedx=1;}
+                if (myGameArea.key && myGameArea.key == 40) {GamePiece.speedY = 10;GamePiece.image.src="attackright.gif";}
+                // if (myGameArea.key && myGameArea.key == 40) {GamePiece.speedY = 10; GamePiece.image.src="front.png";}
+
+                GamePiece.newPos();
+                GamePiece.update();
+                myBlock.update();
+                myBlock2.update();
+                endDoor.update();
+                talkingeye.update();
+            }
+          }
+
+            </script>
+            </body>
+            </html>
